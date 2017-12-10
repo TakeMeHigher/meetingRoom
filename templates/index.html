@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link href="https://cdn.bootcss.com/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.css" rel="stylesheet">
+    <script src="/static/jquery-3.2.1.min.js"></script>
+    <script src="/static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-datepicker/1.7.1/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+
+
+</head>
+<style>
+    #tbody > tr > td {
+        height: 100px;
+        background-color: honeydew;
+        opacity: 0.3;
+        text-align: center;
+        line-height: 100px;
+    }
+</style>
+<body>
+<div class="container">
+    <div class="hide" id="currentUser" uid="{{ requestion.session.user.id }}">{{ request.session.user.name }}</div>
+    <div class="hide" id="muds" muds="{{ muds }} "></div>
+    <div class="row pull-left">
+        <h1>会议室预定</h1>
+    </div>
+
+    <div class="row pull-right">
+        <div class="input-append date datepicker col-md-8">
+            <input type="text" id="datepicker" class="datepicker" placeholder="请选择日期"/>
+            <span class="add-on"><i class="icon-th"></i></span>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary" id="saveBtn">保存</button>
+        </div>
+
+
+    </div>
+    <div class="row">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>会议室</th>
+                <th>8:00</th>
+                <th>9:00</th>
+                <th>10:00</th>
+                <th>11:00</th>
+                <th>12:00</th>
+                <th>13:00</th>
+                <th>14:00</th>
+                <th>15:00</th>
+                <th>16:00</th>
+                <th>17:00</th>
+                <th>18:00</th>
+                <th>19:00</th>
+                <th>20:00</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+            {% for room in rooms %}
+                <tr>
+                    <td class="rommname">{{ room.name }}</td>
+                    <td tm="1"></td>
+                    <td tm="2"></td>
+                    <td tm="3"></td>
+                    <td tm="4"></td>
+                    <td tm="5"></td>
+                    <td tm="6"></td>
+                    <td tm="7"></td>
+                    <td tm="8"></td>
+                    <td tm="9"></td>
+                    <td tm="10"></td>
+                    <td tm="11"></td>
+                    <td tm="12"></td>
+                    <td tm="13"></td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    $(".datepicker").datepicker({
+        language: "zh-CN",
+        autoclose: true,//选中之后自动隐藏日期选择框
+        clearBtn: true,//清除按钮
+        todayBtn: true,//今日按钮
+        format: "yyyy-mm-dd"//日期格式
+    }).on('changeDate', function () {
+        date = $("#datepicker").val();
+        $("#tbody>tr").each(function () {
+
+            var tds = $(this).children('td').slice(1);
+            var roomname = $(this).children().first().html();
+            for (var i = 0; i < tds.length; i++) {
+
+                $td = $(tds[i]);
+                $td.removeAttr("style");
+                $td.html('');
+                $td.removeAttr("mud_id");
+            }
+            console.log(roomname, '----');
+            $.ajax({
+                    url: "",
+                    type: 'POST',
+                    headers: {"X-CSRFToken": $.cookie('csrftoken')},
+                    data: {
+                        date: date
+                    },
+                    success: function (data) {
+
+                        data = JSON.parse(data);
+
+
+                        if (data.length != 0) {
+                            for (var j = 0; j < data.length; j++) {
+                                mud = data[j];
+                                console.log(mud.time, mud.room__name)
+                                for (var i = 0; i < tds.length; i++) {
+                                    $td = $(tds[i]);
+
+                                    if ($td.attr("tm") == mud.time && roomname == mud.room__name) {
+                                        $td.html(mud.UserInfo__name);
+                                        $td.css("background-color", "red");
+                                        $td.attr('mud_id', mud.id)
+                                    }
+                                }
+                            }
+                        } else {
+                            for (var i = 0; i < tds.length; i++) {
+
+                                $td = $(tds[i]);
+                                $td.removeAttr("style");
+                                $td.html('');
+                                $td.removeAttr("mud_id");
+                            }
+                        }
+
+
+                    }
+                }
+            );
+
+
+        });
+
+    });
+
+
+</script>
+<script src="/static/jquery-3.2.1.min.js"></script>
+<script src="/static/jquery.cookie.js"></script>
+<script>
+
+
+    $("#tbody>tr").each(function () {
+
+        var tds = $(this).children('td').slice(1);
+        var roomname = $(this).children().first().html()
+
+        $.ajax({
+                url: "",
+                type: 'POST',
+                headers: {"X-CSRFToken": $.cookie('csrftoken')},
+                success: function (data) {
+                    data = JSON.parse(data);
+                    for (var j = 0; j < data.length; j++) {
+                        mud = data[j];
+                        for (var i = 0; i < tds.length; i++) {
+                            $td = $(tds[i]);
+                            if ($td.attr("tm") == mud.time && roomname == mud.room__name) {
+                                $td.html(mud.UserInfo__name);
+                                $td.css("background-color", "red");
+                                $td.attr('mud_id', mud.id)
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+
+    });
+
+
+    $("td").click(function () {
+        currentUsername = $("#currentUser").html();
+        $this = $(this);
+        con = $(this).html();
+        reserve = $this.attr("reserve");
+        mud_id = $(this).attr('mud_id');
+        if (con) {
+            if (con == currentUsername) {
+                var r = window.confirm("你确定要取消吗?");
+                if (r) {
+
+                    $.ajax({
+                        url: "/cancle/room/" + mud_id + "/",
+                        type: 'GET',
+                        success: function (data) {
+                            if (data == 'ok') {
+                                $this.removeAttr("style");
+                                $this.html('');
+                                $this.removeAttr("mud_id");
+
+                            }
+                        }
+                    })
+                }
+            } else {
+                alert("改时间段内该会议室已经被预定啦")
+            }
+        } else if (reserve) {
+            var t = window.confirm('你确定要取消吗？');
+            if (t) {
+                $this.removeAttr('reserve');
+                $this.removeAttr("style")
+            }
+
+        } else {
+            var s = window.confirm("你要预定这个会议室吗?");
+            if (s) {
+                $this.css('background-color', "green");
+                $this.attr('reserve', 'true')
+                $this.attr('class', 'reserve')
+            }
+        }
+    })
+
+</script>
+
+<script>
+    $("#saveBtn").click(function () {
+        var reserve_list = [];
+        $('.reserve').each(function () {
+            $this = $(this);
+            roomname = $this.parent().children().first().html();
+            time = $this.attr('tm');
+            dt = $("#datepicker").val();
+
+            reserve_list.push({'time': time, "date": dt, 'roomname': roomname})
+        });
+
+        $.ajax({
+            url: "/save/reserve/",
+            type: "POST",
+            headers: {"X-CSRFToken": $.cookie('csrftoken')},
+            contentType: "json",
+            data: JSON.stringify({
+                "reserve_list": reserve_list
+            }),
+            success: function (data) {
+                if (data == 'ok') {
+                    alert('预定成功')
+                    window.location.href = '/index/'
+                }
+            }
+
+        })
+    });
+
+
+    $(".table-condensed>tbody>tr>td").click(function () {
+        alert($("#datepicker").val())
+    });
+</script>
+</html>
