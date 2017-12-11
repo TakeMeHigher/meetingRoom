@@ -21,6 +21,7 @@
         opacity: 0.3;
         text-align: center;
         line-height: 100px;
+
     }
 </style>
 <body>
@@ -47,38 +48,19 @@
             <thead>
             <tr>
                 <th>会议室</th>
-                <th>8:00</th>
-                <th>9:00</th>
-                <th>10:00</th>
-                <th>11:00</th>
-                <th>12:00</th>
-                <th>13:00</th>
-                <th>14:00</th>
-                <th>15:00</th>
-                <th>16:00</th>
-                <th>17:00</th>
-                <th>18:00</th>
-                <th>19:00</th>
-                <th>20:00</th>
+                {% for time in time_choices %}
+                       <td>{{ time.1 }}</td>
+                    {% endfor %}
             </tr>
             </thead>
             <tbody id="tbody">
             {% for room in rooms %}
                 <tr>
                     <td class="rommname">{{ room.name }}</td>
-                    <td tm="1"></td>
-                    <td tm="2"></td>
-                    <td tm="3"></td>
-                    <td tm="4"></td>
-                    <td tm="5"></td>
-                    <td tm="6"></td>
-                    <td tm="7"></td>
-                    <td tm="8"></td>
-                    <td tm="9"></td>
-                    <td tm="10"></td>
-                    <td tm="11"></td>
-                    <td tm="12"></td>
-                    <td tm="13"></td>
+
+                    {% for time in time_choices %}
+                       <td tm="{{ time.0 }}"></td>
+                    {% endfor %}
                 </tr>
             {% endfor %}
 
@@ -118,8 +100,6 @@
                     success: function (data) {
 
                         data = JSON.parse(data);
-
-
                         if (data.length != 0) {
                             for (var j = 0; j < data.length; j++) {
                                 mud = data[j];
@@ -129,7 +109,7 @@
 
                                     if ($td.attr("tm") == mud.time && roomname == mud.room__name) {
                                         $td.html(mud.UserInfo__name);
-                                        $td.css("background-color", "red");
+                                        $td.css("background-color", " greenyellow");
                                         $td.attr('mud_id', mud.id)
                                     }
                                 }
@@ -160,7 +140,7 @@
 <script src="/static/jquery.cookie.js"></script>
 <script>
 
-
+//遍历循环每一个tr生成数据
     $("#tbody>tr").each(function () {
 
         var tds = $(this).children('td').slice(1);
@@ -178,7 +158,7 @@
                             $td = $(tds[i]);
                             if ($td.attr("tm") == mud.time && roomname == mud.room__name) {
                                 $td.html(mud.UserInfo__name);
-                                $td.css("background-color", "red");
+                                $td.css("background-color", " greenyellow");
                                 $td.attr('mud_id', mud.id)
                             }
                         }
@@ -193,7 +173,7 @@
 
     });
 
-
+//td绑定事件
     $("td").click(function () {
         currentUsername = $("#currentUser").html();
         $this = $(this);
@@ -240,7 +220,9 @@
 
 </script>
 
+
 <script>
+    //td保存
     $("#saveBtn").click(function () {
         var reserve_list = [];
         $('.reserve').each(function () {

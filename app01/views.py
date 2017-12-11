@@ -62,6 +62,7 @@ def pcajax_validate(request):
 def index(request):
     muds_dic = {}
     muds_l = []
+    time_choices=models.Room_userinfo_date.time_choice
     if request.method == 'POST':
         date = request.POST.get("date")
         if date:
@@ -91,7 +92,7 @@ def index(request):
     # for mud in muds:
     #     muds_l.append(mud)
 
-    return render(request, 'index.html', {"rooms": rooms})
+    return render(request, 'index.html', {"rooms": rooms,"time_choices":time_choices})
 
 
 
